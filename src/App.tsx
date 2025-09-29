@@ -1,78 +1,90 @@
-import { useState } from "react";
-import "./App.css";
+"use client"
 
-// Lista de candidatos con imagen (puedes cambiar las URLs por fotos reales)
-const candidatos = [
+import { useState } from "react"
+import { VoteHeader } from "./Components/vote-header"
+import { VoteGrid } from "./Components/vote-grid"
+import { VoteButton } from "./Components/vote-button"
+import { ConfirmationDialog } from "./Components/confirmation-dialog"
+import "./App.css"
+
+// Sample candidate data
+const candidates = [
   {
     id: 1,
-    nombre: "Candidato 1",
-    partido: "Partido Azul",
-    foto: "https://via.placeholder.com/120x120.png?text=C1",
+    name: "María González",
+    party: "Partido Democrático",
+    photo: "/professional-woman-politician-headshot-2.jpg",
   },
   {
     id: 2,
-    nombre: "Candidato 2",
-    partido: "Partido Verde",
-    foto: "https://via.placeholder.com/120x120.png?text=C2",
+    name: "Carlos Rodríguez",
+    party: "Partido Liberal",
+    photo: "/professional-politician-2.png",
   },
   {
     id: 3,
-    nombre: "Candidato 3",
-    partido: "Partido Rojo",
-    foto: "https://via.placeholder.com/120x120.png?text=C3",
+    name: "Ana Martínez",
+    party: "Partido Verde",
+    photo: "/professional-woman-politician-headshot-green-2.jpg",
   },
   {
     id: 4,
-    nombre: "Candidato 4",
-    partido: "Partido Amarillo",
-    foto: "https://via.placeholder.com/120x120.png?text=C4",
+    name: "José López",
+    party: "Partido Conservador",
+    photo: "/professional-man-politician-headshot-conservative-2.jpg",
   },
-];
+  {
+    id: 5,
+    name: "Laura Fernández",
+    party: "Partido Socialista",
+    photo: "/professional-woman-politician-headshot-socialist-2.jpg",
+  },
+  {
+    id: 6,
+    name: "Miguel Torres",
+    party: "Partido Independiente",
+    photo: "/professional-man-politician-headshot-independent-2.jpg",
+  },
+]
 
-function App() {
-  const [seleccionado, setSeleccionado] = useState<number | null>(null);
+export default function App() {
+  const [selectedCandidate, setSelectedCandidate] = useState<number | null>(null)
+  const [showConfirmation, setShowConfirmation] = useState(false)
 
-  const manejarSeleccion = (id: number) => {
-    setSeleccionado(id);
-  };
+  const handleVoteSubmit = () => {
+    if (selectedCandidate) {
+      setShowConfirmation(true)
+    }
+  }
+
+  const handleConfirmVote = () => {
+    // Here you would typically send the vote to your backend
+    console.log(`Vote submitted for candidate ${selectedCandidate}`)
+    setShowConfirmation(false)
+    // Reset or redirect as needed
+    alert("¡Su voto ha sido registrado exitosamente!")
+  }
 
   return (
-    <div className="contenedor">
-      <h1>🗳️ Elecciones 2025</h1>
-      <div className="fila-candidatos">
-        {candidatos.map((candidato) => (
-          <div key={candidato.id} className="candidato">
-            <img src={candidato.foto} alt={candidato.nombre} className="foto" />
-            <div className="info">
-              <h3>{candidato.nombre}</h3>
-              <p>{candidato.partido}</p>
-            </div>
-            <div
-              className="casilla"
-              onClick={() => manejarSeleccion(candidato.id)}
-            >
-              {seleccionado === candidato.id ? "X" : ""}
-            </div>
-          </div>
-        ))}
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto px-4 py-8 max-w-6xl">
+        <VoteHeader />
+
+        <VoteGrid
+          candidates={candidates}
+          selectedCandidate={selectedCandidate}
+          onSelectCandidate={setSelectedCandidate}
+        />
+
+        <VoteButton disabled={!selectedCandidate} onClick={handleVoteSubmit} />
+
+        <ConfirmationDialog
+          open={showConfirmation}
+          onOpenChange={setShowConfirmation}
+          onConfirm={handleConfirmVote}
+          candidateName={candidates.find((c) => c.id === selectedCandidate)?.name || ""}
+        />
       </div>
-
-      <button
-        className="btn-enviar"
-        onClick={() =>
-          seleccionado
-            ? alert(
-                `✅ Voto enviado: ${
-                  candidatos.find((c) => c.id === seleccionado)?.nombre
-                }`
-              )
-            : alert("⚠️ Debes seleccionar un candidato antes de enviar")
-        }
-      >
-        Enviar voto
-      </button>
     </div>
-  );
+  )
 }
-
-export default App;
