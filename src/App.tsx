@@ -1,11 +1,13 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { VoteHeader } from "./Components/vote-header"
-import { VoteGrid } from "./Components/vote-grid"
-import { VoteButton } from "./Components/vote-button"
-import { ConfirmationDialog } from "./Components/confirmation-dialog"
-import "./App.css"
+import { useState } from "react";
+import { VoteHeader } from "./Components/vote-header";
+import { VoteGrid } from "./Components/vote-grid";
+import { VoteButton } from "./Components/vote-button";
+import { ConfirmationDialog } from "./Components/confirmation-dialog";
+import { CodeDialog } from "./Components/code-dialog";
+import { SuccessDialog } from "./Components/success-dialog";
+import "./App.css";
 
 // Sample candidate data
 const candidates = [
@@ -45,25 +47,41 @@ const candidates = [
     party: "Partido Independiente",
     photo: "/professional-man-politician-headshot-independent-2.jpg",
   },
-]
+];
 
 export default function App() {
-  const [selectedCandidate, setSelectedCandidate] = useState<number | null>(null)
-  const [showConfirmation, setShowConfirmation] = useState(false)
+  const [selectedCandidate, setSelectedCandidate] = useState<number | null>(
+    null
+  );
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [showCode, setShowCode] = useState(false);
+  const [codeError, setCodeError] = useState<string | null>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const confirmationEmail = "usuario@correo.com"; // prototipo: correo estático
+  const OTP_CODE = "123456"; // prototipo: código estático
 
   const handleVoteSubmit = () => {
     if (selectedCandidate) {
-      setShowConfirmation(true)
+      setShowConfirmation(true);
     }
-  }
+  };
 
   const handleConfirmVote = () => {
-    // Here you would typically send the vote to your backend
-    console.log(`Vote submitted for candidate ${selectedCandidate}`)
-    setShowConfirmation(false)
-    // Reset or redirect as needed
-    alert("¡Su voto ha sido registrado exitosamente!")
-  }
+    // Paso 1: cerrar confirmación y abrir ingreso de código (prototipo)
+    setShowConfirmation(false);
+    setCodeError(null);
+    setShowCode(true);
+  };
+
+  const handleValidateCode = (code: string) => {
+    if (code === OTP_CODE) {
+      setShowCode(false);
+      setShowSuccess(true);
+      console.log(`Vote submitted for candidate ${selectedCandidate}`);
+    } else {
+      setCodeError("Código incorrecto. Inténtalo de nuevo.");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -82,9 +100,27 @@ export default function App() {
           open={showConfirmation}
           onOpenChange={setShowConfirmation}
           onConfirm={handleConfirmVote}
-          candidateName={candidates.find((c) => c.id === selectedCandidate)?.name || ""}
+          candidateName={
+            candidates.find((c) => c.id === selectedCandidate)?.name || ""
+          }
+        />
+        <CodeDialog
+          open={showCode}
+          onOpenChange={setShowCode}
+          onValidate={handleValidateCode}
+          email={confirmationEmail}
+          expectedCode={OTP_CODE}
+          error={codeError}
+        />
+
+        <SuccessDialog
+          open={showSuccess}
+          onClose={() => setShowSuccess(false)}
+          candidateName={
+            candidates.find((c) => c.id === selectedCandidate)?.name || ""
+          }
         />
       </div>
     </div>
-  )
+  );
 }
